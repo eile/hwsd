@@ -1,6 +1,6 @@
 
 /*
-  Copyright (c) 2011-2012, Stefan Eilemann <eile@eyescale.ch>
+  Copyright (c) 2011-2017, Stefan Eilemann <eile@eyescale.ch>
 
   This file is part of the HW-SD daemon.
 
@@ -36,7 +36,10 @@
 #include <hwsd/net/dns_sd/module.h>
 #include <hwsd/net/sys/module.h>
 
-#include <lunchbox/lunchbox.h>
+#include <lunchbox/daemon.h>
+#include <lunchbox/file.h>
+
+#include <extra/sleep.h>
 
 #ifdef HWSD_USE_BOOST
 #pragma warning(disable : 4275)
@@ -128,15 +131,10 @@ int main(const int argc, char* argv[])
 
     if (daemon)
     {
-#if LUNCHBOX_VERSION_GT(1, 5, 0)
-        if (lunchbox::Log::setOutput("hwsd.log"))
-            lunchbox::daemonize();
-#else
-        LBWARN << "Ignoring daemon request, need Lunchbox >= 1.5.1, got "
-               << lunchbox::Version::getString() << std::endl;
-#endif
+        lunchbox::Log::setOutput("hwsd.log");
+        lunchbox::daemonize();
         for (;;)
-            lunchbox::sleep(0xFFFFFFFFu);
+            extra::sleep(0xFFFFFFFFu);
     }
 
     std::cout << "Press <Enter> to quit" << std::endl;
